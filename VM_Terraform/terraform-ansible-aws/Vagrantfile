@@ -1,0 +1,48 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+Vagrant.configure("2") do |config|
+
+    common = <<-SHELL
+    sudo apt update -qq 2>&1 > /dev/null
+    echo "🌎🌍🌏🌕 Début d'installations de Terraform 🌕🌎🌍🌏"
+    curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+    sudo apt-add-repository "deb [arch=$(dpkg --print-architecture)] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+    sudo apt install terraform
+    # echo "🌎🌍🌏🌕 Début d'installations d'Ansible 🌕🌎🌍🌏"
+    # sudo apt install software-properties-common --yes
+    # sudo add-apt-repository --yes --update ppa:ansible/ansible
+    # sudo apt install ansible --yes
+    echo "🌎🌍🌏🌕 Installation d'AWS CLI 🌕🌎🌍🌏"
+    sudo apt-get update && sudo apt-get install awscli -y && sudo aws --version
+    echo "💯💯💯👍 Fin d'installations de packages 👍💯💯💯"
+    sed -i 's/ChallengeResponseAuthentication no/ChallengeResponseAuthentication yes/g' /etc/ssh/sshd_config
+    sudo systemctl restart sshd
+    SHELL
+    
+      # config.vm.box = "hashicorp/bionic64"
+      # config.vm.hostname = "terraformtest"
+    
+      # # config.vm.network "private_network", ip: "10.1.1.50"
+      # config.vm.network "private_network", ip: "192.168.50.50"
+      # config.vm.network "forwarded_port", guest: 22, host: "2210", id: "ssh"
+  
+      # config.vm.provision :shell, :inline => common
+  
+  
+      config.vm.define "terraformtest" do |node|
+        node.vm.box = "bento/ubuntu-18.04"
+        node.vm.hostname = "terraformtest"
+      
+        node.vm.network :private_network, ip: "192.168.50.50"
+        node.vm.network "forwarded_port", guest: 22, host: "2211", id: "ssh"
+  
+        node.vm.provider :virtualbox do |v|
+          v.customize ["modifyvm", :id, "--memory", 2048]
+          v.customize ["modifyvm", :id, "--name", "terraformtest"]
+        end
+  
+        node.vm.provision :shell, :inline => common
+  
+      end
+  end

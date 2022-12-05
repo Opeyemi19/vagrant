@@ -1,0 +1,22 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lab-python-consumer
+  namespace: app
+spec:
+  selector:
+    matchLabels:
+      app: lab-python-consumer
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: lab-python-consumer
+    spec:
+      containers:
+      - name: lab-python-consumer
+        image: diegoluisi/lab-python-consumer:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 5000
